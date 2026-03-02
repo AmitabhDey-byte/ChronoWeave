@@ -1,301 +1,234 @@
-ChronoWeave
-Intelligent Constraint-Based Timetable Optimization System
+# 🕒 ChronoWeave  
+### Intelligent Constraint-Based Timetable Optimization System  
+> *From Complex Constraints to Optimal Timetables.*
 
-Tagline: From Complex Constraints to Optimal Timetables.
+---
 
-📌 Overview
+## 🚀 Overview
 
-ChronoWeave is a constraint-driven academic timetable optimization system designed to generate optimal or near-optimal schedules while satisfying institutional constraints.
+**ChronoWeave** is an intelligent academic scheduling system that models timetable generation as a **Constraint Satisfaction Problem (CSP)** and solves it using mathematical optimization techniques.
 
-The system models timetable generation as a Constraint Satisfaction Problem (CSP) and uses mathematical optimization techniques to ensure feasibility, efficiency, and adaptability.
+It generates optimal or near-optimal timetables while satisfying institutional constraints such as faculty availability, course credits, and room capacities.
 
-ChronoWeave supports:
+---
 
-Hard and soft constraint modeling
+## 🎯 Problem We Solve
 
-Dynamic schedule regeneration
+Academic timetable creation is complex due to:
 
-Conflict detection and explanation
+- 👨‍🏫 Faculty availability constraints  
+- 📚 Course credit requirements  
+- 🏫 Room capacity limitations  
+- 🧪 Lab scheduling dependencies  
+- 🔄 Frequent last-minute changes  
 
-Interactive timetable visualization
+Manual scheduling leads to:
+- Conflicts  
+- Inefficient resource allocation  
+- High administrative workload  
 
-🎯 Problem Statement
+ChronoWeave automates and optimizes this process.
 
-Academic institutions face complex scheduling challenges due to:
+---
 
-Faculty availability constraints
-
-Course credit requirements
-
-Room capacity limitations
-
-Lab scheduling dependencies
-
-Frequent constraint updates
-
-Manual scheduling often leads to:
-
-Overlapping assignments
-
-Resource underutilization
-
-Administrative inefficiency
-
-Time-consuming revisions
-
-ChronoWeave automates and optimizes this process using constraint programming.
-
-🏗 System Architecture
-
-ChronoWeave follows a layered, modular architecture:
-
+## 🏗 System Architecture
 User (Admin / Scheduler)
-        ↓
+↓
 Frontend – Next.js Dashboard
-        ↓
+↓
 Node.js API Layer
-        ↓
+↓
 Optimization Engine (Python + OR-Tools CP-SAT)
-        ↓
+↓
 PostgreSQL Database (Supabase)
-        ↓
+↓
 Visualization Dashboard
-        ↘
-       Gemini API (Conflict Explanation Layer)
-🔄 Data Flow
-1. Data Input
+↘
+Gemini API (Conflict Explanation Layer)
 
+
+---
+
+## 🔄 Data Flow
+
+### 1️⃣ Data Input
 Admin provides:
+- Faculty availability
+- Course structure & credit hours
+- Room capacity & lab details
+- Time slot definitions
 
-Faculty availability data
+### 2️⃣ API Processing
+- Input validation
+- JSON payload structuring
+- Request sent to optimization engine
 
-Course structure & credit hours
+### 3️⃣ Optimization Engine
+- Decision variable creation
+- Hard & soft constraint modeling
+- CP-SAT solver execution
+- Optimal / infeasible schedule generation
 
-Room capacity and lab schedules
-
-Available time slots
-
-2. API Processing
-
-Node.js backend:
-
-Validates input data
-
-Structures JSON payload
-
-Sends request to optimization engine
-
-3. Constraint Modeling & Optimization
-
-Python engine:
-
-Defines decision variables
-
-Applies hard constraints
-
-Applies soft constraints
-
-Runs CP-SAT solver
-
-Returns optimal or infeasible result
-
-4. Conflict Handling
-
+### 4️⃣ Conflict Handling
 If infeasible:
+- Solver detects constraint violation
+- Gemini API generates human-readable explanation
 
-Solver reports constraint failure
+### 5️⃣ Storage & Visualization
+- Schedule stored in PostgreSQL
+- Dashboard displays interactive timetable
+- Conflicts highlighted dynamically
 
-Gemini API generates human-readable explanation
+---
 
-5. Data Storage
+## 🧠 Technology Stack
 
-Generated schedules and metadata are stored in PostgreSQL via Supabase.
+### 💻 Frontend
+- Next.js
+- React
+- Tailwind CSS
 
-6. Visualization
+### 🌐 Backend
+- Node.js (API Layer)
 
-Frontend dashboard displays:
+### ⚙ Optimization Engine
+- Python
+- Google OR-Tools (CP-SAT Solver)
 
-Interactive timetable grid
+### 🗄 Database
+- PostgreSQL
+- Supabase
 
-Conflict highlights
+### 🤖 AI Layer
+- Gemini API (Conflict explanation & reporting)
 
-Regeneration controls
+---
 
-🧠 Technology Stack
-Frontend
+## ⚙ Constraint Modeling
 
-Next.js
+### 🔢 Decision Variable
 
-React
 
-Tailwind CSS
-
-Backend
-
-Node.js (API Layer)
-
-Optimization Engine
-
-Python
-
-Google OR-Tools (CP-SAT Solver)
-
-Database
-
-PostgreSQL
-
-Supabase
-
-AI Layer
-
-Gemini API (for conflict explanation and reporting)
-
-⚙ Constraint Modeling Approach
-Decision Variables
 X[course][room][slot] = 1 if assigned, else 0
-Hard Constraints
 
-A faculty cannot teach multiple courses in the same time slot
 
-A room cannot host multiple courses simultaneously
+---
 
-Course credit hours must be satisfied
+### ✅ Hard Constraints
+- No faculty overlap
+- No room overlap
+- Credit hours must be fulfilled
+- Room capacity ≥ enrolled students
 
-Room capacity must be greater than or equal to enrolled students
+---
 
-Soft Constraints
+### 🎯 Soft Constraints
+- Minimize idle gaps
+- Balance faculty workload
+- Avoid excessive consecutive lectures
 
-Minimize idle gaps between sessions
+---
 
-Balance faculty workload
+### 🏆 Objective
 
-Avoid excessive consecutive lectures
+Minimize total penalty from soft constraint violations  
+while satisfying all hard constraints.
 
-Objective Function
+If no feasible solution exists, the system:
+- Returns infeasible status
+- Provides AI-generated conflict explanation
 
-Minimize total penalty score from soft constraint violations while satisfying all hard constraints.
+---
 
-If no feasible solution exists:
+## 🔁 Dynamic Regeneration
 
-System returns infeasible status
+When constraints change:
+- Model is updated
+- Solver re-executes
+- Valid allocations are preserved
+- New optimized timetable is generated
 
-AI layer provides conflict explanation
+Ensures minimal disruption.
 
-🔁 Dynamic Regeneration
+---
 
-When constraints change (e.g., faculty leave, room update, new course):
+## ✨ Key Features
 
-Updated constraints are re-modeled
+- 📊 Automated timetable generation
+- 🚫 Conflict detection & reporting
+- 🔄 Dynamic schedule regeneration
+- ⚡ Optimized resource allocation
+- 📈 Scalable institutional deployment
+- 🖥 Interactive visualization dashboard
 
-Optimization engine re-runs solver
+---
 
-Valid allocations are preserved where possible
+## 🗂 Database Structure (High-Level)
 
-New optimal schedule is generated
+### Faculty
+- id
+- name
+- availability
 
-This ensures minimal disruption to existing schedules.
+### Courses
+- id
+- faculty_id
+- credit_hours
+- student_count
 
-📊 Key Features
+### Rooms
+- id
+- capacity
+- type
 
-Automated constraint-based timetable generation
+### TimeSlots
+- id
+- day
+- start_time
+- end_time
 
-Conflict detection and reporting
+### Schedules
+- id
+- course_id
+- room_id
+- slot_id
+- generated_at
 
-Optimal resource allocation
+---
 
-Dynamic re-generation on updates
+## 📈 Impact & Benefits
 
-Interactive dashboard visualization
+- Eliminates manual scheduling errors
+- Reduces administrative workload
+- Ensures optimal faculty & room utilization
+- Provides transparent conflict reporting
+- Scalable across departments & campuses
 
-Scalable institutional deployment
+---
 
-🗄 Database Structure (High-Level)
-Faculty
+## 🔮 Future Enhancements
 
-id
+- Multi-objective optimization
+- Advanced soft constraint weighting
+- ERP system integration
+- Predictive workload analytics
+- Multi-campus deployment support
 
-name
+---
 
-availability
+## 📚 Research Foundation
 
-Courses
+- Constraint Satisfaction Problems (CSP)
+- Operations Research in scheduling
+- CP-SAT optimization techniques
+- Academic timetabling models
 
-id
+---
 
-faculty_id
+## 🏁 Conclusion
 
-credit_hours
+ChronoWeave bridges mathematical optimization and modern web architecture to deliver a scalable, intelligent academic scheduling system.
 
-student_count
+It transforms complex constraints into structured, optimized timetables — efficiently and intelligently.
 
-Rooms
-
-id
-
-capacity
-
-type
-
-TimeSlots
-
-id
-
-day
-
-start_time
-
-end_time
-
-Schedules
-
-id
-
-course_id
-
-room_id
-
-slot_id
-
-generated_at
-
-📈 Impact & Benefits
-
-Eliminates manual scheduling conflicts
-
-Reduces administrative workload
-
-Improves transparency and planning efficiency
-
-Ensures optimal utilization of faculty and rooms
-
-Scalable across departments and campuses
-
-🚀 Scalability & Future Enhancements
-
-Multi-department scheduling support
-
-Multi-campus deployment
-
-Advanced soft constraint weighting
-
-ERP integration
-
-Performance benchmarking
-
-Multi-objective optimization
-
-📚 Research Foundations
-
-Constraint Satisfaction Problems (CSP)
-
-Operations Research in scheduling
-
-CP-SAT optimization techniques
-
-Academic timetabling research
-
-🏁 Conclusion
-
-ChronoWeave transforms complex academic scheduling into a structured optimization problem, ensuring feasibility, efficiency, and adaptability through mathematical modeling and intelligent system design.
-
-It bridges optimization theory with modern web architecture to deliver a scalable, production-ready scheduling solution.
+---
