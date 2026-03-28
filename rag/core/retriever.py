@@ -1,8 +1,10 @@
 from db.chroma_store import ChromaStore
+
 class Retriever:
     def __init__(self):
         self.store = ChromaStore()
- def get_relevant_docs(self, query: str, n_results: int = 5, filters=None):
+
+    def get_relevant_docs(self, query: str, n_results: int = 5, filters=None):
         """
         Retrieve top relevant documents from vector DB
         """
@@ -12,8 +14,10 @@ class Retriever:
             n_results=n_results,
             filters=filters
         )
+
         documents = results.get("documents", [[]])[0]
         metadatas = results.get("metadatas", [[]])[0]
+
         combined = []
         for doc, meta in zip(documents, metadatas):
             combined.append({
