@@ -1,8 +1,9 @@
 from pypdf import PdfReader
 import os
 
-def load_pdf(file_path: str) -> str:
-    reader = PdfReader(file_path)
+
+def load_pdf(input_path: str) -> str:
+    reader = PdfReader(input_path)
     text = ""
 
     for page in reader.pages:
@@ -21,7 +22,7 @@ def chunk_text(text: str, chunk_size=500, overlap=100):
         end = start + chunk_size
         chunk = text[start:end]
 
-        if chunk.strip():  # avoid empty chunks
+        if chunk.strip():  
             chunks.append(chunk)
 
         start += chunk_size - overlap
@@ -38,7 +39,7 @@ def save_chunks(chunks, output_path):
 
 
 def process_pdf():
-    input_path = "rag/data/raw/roadmap.pdf"
+    input_path = r"D:\ChronoWeave-2\ChronoWeave\rag\data\raw\roadmap.pdf"
     output_path = "rag/data/processed/chunks.txt"
 
     print("Reading PDF...")

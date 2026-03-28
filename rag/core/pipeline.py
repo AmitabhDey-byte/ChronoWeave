@@ -1,48 +1,56 @@
-from transformers import pipeline
+from models.hf_model import HFModels
 from core.retriever import Retriever
-
 class RAGPipeline:
     def __init__(self):
         self.retriever = Retriever()
+        self.models = HFModels()
 
-        # Simple text generation model
-        self.generator = pipeline(
-            "text-generation",
-            model="google/flan-t5-base",
-            max_length=512
-        )
+    def build_prompt(self, user_query: str, context_docs: list[dict]) -> str:
+        if context_docs:
+            context_text = "\n\n".join([doc["text"] for doc in context_docs])
+            context_block = f"""
+The following is relevant knowledge retrieved from a career database.
+Use it as grounding, but also apply your own broader knowledge:
 
-    def build_prompt(self, user_query, context_docs):
-        context_text = "\n\n".join([doc["text"] for doc in context_docs])
-
-        prompt = f"""
-You are an AI career mentor.
-
-User goal:
-{user_query}
-
-Relevant knowledge:
+--- Retrieved context ---
 {context_text}
+--- End of context ---
+"""
+        else:
+            context_block = "(No specific documents were retrieved. Use your own knowledge.)\n"
 
-Generate a structured roadmap with:
-- Required skills
-- Step-by-step learning path
-- Suggested resources
-- Timeline (beginner to advanced)
+        return f"""<|system|>
+You are an expert AI career mentor. You have two sources of knowledge:
+1. Retrieved career documents provided below (domain-specific grounding)
+2. Your own broad knowledge of industries, skills, and career paths
 
-Make it clear and beginner-friendly.
+Always combine both. Do NOT just repeat the retrieved text — synthesize it with
+what you know to give the most complete, actionable advice possible.
+If the retrieved context is missing something important, fill the gap yourself.
+<|user|>
+{context_block}
+Career goal: {user_query}
+
+Generate a structured career roadmap with:
+- A brief overview of the path
+- Required skills (split into: already common knowledge vs. specialized)
+- Step-by-step learning path (with realistic timeframes)
+- Suggested free and paid resources
+- Common mistakes to avoid
+
+Be specific, practical, and encouraging.
+<|assistant|>
 """
 
-        return prompt
+    def generate_roadmap(self, user_query: str) -> str:
+        if not self.retriever.is_ready():
+            return "No documents indexed yet. Please run `python rag/embeddings.py` first."
 
-    def generate_roadmap(self, user_query: str):
-        # Step 1: Retrieve context
         docs = self.retriever.get_relevant_docs(user_query, n_results=5)
-
-        # Step 2: Build prompt
         prompt = self.build_prompt(user_query, docs)
 
-        # Step 3: Generate output
-        response = self.generator(prompt)[0]["generated_text"]
-
-        return response
+        raw = self.models.generate_raw(prompt)
+        marker = "<|assistant|>"
+        if marker in raw:
+            return raw.split(marker)[-1].strip()
+        return raw.strip()
