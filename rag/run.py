@@ -2,7 +2,7 @@ import argparse
 
 from core.ingest import process_pdf
 from core.embed import main as embed_data
-from core.rag_pipeline import RAGPipeline
+from core.pipeline import RAGPipeline
 
 
 def run_ingest():
