@@ -20,12 +20,11 @@ class HFModels:
             do_sample=True,
             temperature=0.7,
             top_p=0.9,
-            repetition_penalty=1.15,   # reduces looping / repeating context verbatim
+            repetition_penalty=1.15,  
         )
 
         print("[HFModels] Ready.")
 
-    # ── Embeddings ─────────────────────────────────────────────────────────────
 
     def embed_text(self, texts: str | list[str]) -> list[list[float]]:
         """
@@ -36,7 +35,6 @@ class HFModels:
             texts = [texts]
         return self.embedder.encode(texts, normalize_embeddings=True).tolist()
 
-    # ── Generation ─────────────────────────────────────────────────────────────
 
     def generate_raw(self, full_prompt: str) -> str:
         """

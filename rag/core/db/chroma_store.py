@@ -100,3 +100,4 @@ class ChromaStore:
         print("[ChromaStore] Collection deleted and recreated.")
     def persist(self):
         pass
+    
