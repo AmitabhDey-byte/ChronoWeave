@@ -65,7 +65,6 @@ class HFModels:
         full_text = output[0]["generated_text"]
         return self._strip_prompt(full_text, prompt)
 
-    # ── Helpers ────────────────────────────────────────────────────────────────
 
     def _build_chat_prompt(self, system: str, user: str) -> str:
         """Format a prompt using TinyLlama's chat template."""
@@ -87,8 +86,7 @@ class HFModels:
             reply = full_text.split(marker)[-1].strip()
             if reply:
                 return reply
-
-        # fallback: remove the prompt prefix if it was echoed literally
+            
         if full_text.startswith(prompt):
             return full_text[len(prompt):].strip()
 

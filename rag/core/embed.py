@@ -1,5 +1,5 @@
 from db.chroma_store import ChromaStore
-def load_chunks(file_path="rag/data/processed/chunks.txt"):
+def load_chunks(file_path="/data/processed/chunks.txt"):
     with open(file_path, "r", encoding="utf-8") as f:
         raw = f.read()
     chunks = raw.split("\n---\n")
