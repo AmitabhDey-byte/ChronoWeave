@@ -1,230 +1,112 @@
-# ChronoWeave 🧠📚
+# ChronoWeave
 
-AI-powered personalized learning roadmap platform built with Next.js, FastAPI, and RAG (Retrieval-Augmented Generation).
+ChronoWeave is an AI-powered learning roadmap platform built with Next.js, FastAPI, and a RAG pipeline. It helps users turn their goals, interests, and background into a structured roadmap with source-aware guidance.
 
-## 🌟 Features
+## Features
 
-- **Personalized Learning Paths**: AI-generated roadmaps based on your goals, experience, and interests
-- **Interactive Onboarding**: Sliding questionnaire to understand your learning preferences
-- **Real-time Recommendations**: Smart suggestions powered by RAG technology
-- **Progress Tracking**: Visual analytics and learning activity feeds
-- **Modern UI**: Glassmorphism design with smooth animations
-- **Full-Stack Architecture**: Next.js frontend with FastAPI backend
+- personalized onboarding-based learner profiles
+- roadmap generation powered by backend and RAG
+- Clerk authentication with protected routes
+- profile management linked to user metadata
+- notebook-style UI for the learning studio
 
-## 🏗️ Architecture
+## Tech Stack
 
-```
+### Frontend
+- Next.js 16
+- React 19
+- TypeScript
+- Clerk
+- Framer Motion
+
+### Backend
+- FastAPI
+- Uvicorn
+- Pydantic
+
+### RAG Layer
+- ChromaDB
+- custom ingestion, embedding, retrieval, and generation pipeline
+
+## Project Structure
+
+```text
 ChronoWeave/
-├── frontend/my-app/          # Next.js 16 frontend
-│   ├── app/                  # App Router pages
-│   ├── components/           # Reusable UI components
-│   └── lib/                  # Utilities and types
-├── backend/                  # FastAPI backend
-│   ├── main.py              # FastAPI application
-│   ├── rag_service.py       # RAG service wrapper
-│   └── requirements.txt     # Python dependencies
-├── rag/                     # RAG system (Python)
-│   ├── core/                # Core RAG components
-│   ├── models/              # ML models
-│   └── data/                # Embeddings and processed data
-└── package.json             # Root management scripts
++-- backend/                FastAPI backend
++-- frontend/my-app/        Next.js frontend
++-- rag/                    RAG pipeline and indexed data
++-- scripts/                root dev utilities
++-- package.json            root scripts
++-- README.md
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
-### Prerequisites
-
-- **Node.js** 18+
-- **Python** 3.8+
-- **Git**
-
-### 1. Clone and Setup
+### Install dependencies
 
 ```bash
-git clone <repository-url>
-cd ChronoWeave
-
-# Install all dependencies (frontend, backend, root)
-npm run install:all
-```
-
-### 2. Set up RAG System (Optional but Recommended)
-
-```bash
-# Process documents and create embeddings
-cd rag
-python run.py --mode ingest
-python run.py --mode embed
-cd ..
-```
-
-### 3. Start Development Servers
-
-```bash
-# Start both frontend and backend simultaneously
-npm run dev
-
-# Or start individually:
-npm run backend    # FastAPI server on :8000
-npm run frontend   # Next.js dev server on :3000
-```
-
-### 4. Access the Application
-
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8000
-- **API Docs**: http://localhost:8000/docs
-
-## 📖 Usage
-
-### For Learners
-
-1. **Complete Onboarding**: Answer questions about your experience, goals, and preferences
-2. **View Dashboard**: See personalized recommendations and learning paths
-3. **Track Progress**: Monitor your learning journey with visual analytics
-4. **Get AI Tips**: Receive smart learning suggestions and study advice
-
-### For Developers
-
-#### API Endpoints
-
-```bash
-# Health check
-GET /health
-
-# Get personalized recommendations
-POST /api/recommendations
-Content-Type: application/json
-
-{
-  "experienceLevel": "beginner",
-  "learningGoals": ["web development"],
-  "interests": ["frontend", "react"],
-  "preferredPace": "moderate",
-  "timeCommitment": "moderate",
-  "background": "some programming experience"
-}
-
-# Generate roadmap
-POST /api/roadmap
-Content-Type: application/json
-
-{
-  "query": "I want to become a full-stack developer"
-}
-```
-
-## 🛠️ Development
-
-### Frontend (Next.js)
-
-```bash
-cd frontend/my-app
 npm install
-npm run dev          # Development server
-npm run build        # Production build
-npm run start        # Production server
+cd frontend/my-app && npm install
+cd ../../backend && pip install -r requirements.txt
 ```
 
-### Backend (FastAPI)
+### Run locally
+
+From the project root:
 
 ```bash
-cd backend
-pip install -r requirements.txt
-python run.py        # Development server with auto-reload
+npm run dev
 ```
 
-### RAG System
+This starts:
+- frontend
+- backend
+- RAG preparation if needed
+
+## Useful Scripts
 
 ```bash
-cd rag
-python run.py --mode ingest    # Process documents
-python run.py --mode embed     # Create embeddings
-python run.py --mode query     # Test queries
+npm run dev
+npm run backend
+npm run frontend
+npm run rag
+npm run rag:ingest
+npm run rag:embed
 ```
 
-## 🐳 Docker Deployment
+## Environment Variables
 
-### Backend Only
+### Frontend
 
-```bash
-cd backend
-docker-compose up --build
+Create `frontend/my-app/.env`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_key
+CLERK_SECRET_KEY=your_secret
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 ```
 
-### Full Stack
+### Backend
 
-```bash
-# Update docker-compose.yml to include frontend service
-docker-compose up --build
-```
+Optional example:
 
-## 🔧 Configuration
-
-### Environment Variables
-
-**Backend (.env)**
 ```env
 BACKEND_HOST=0.0.0.0
 BACKEND_PORT=8000
-DEBUG=True
+DEBUG=true
 FRONTEND_URL=http://localhost:3000
-RAG_DATA_PATH=../rag/data
-MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
 ```
 
-**Frontend**
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
+## API Endpoints
 
-## 📊 Tech Stack
+- `GET /health`
+- `POST /api/v1/recommendations`
+- `POST /api/v1/roadmap/generate`
 
-### Frontend
-- **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Animations**: Framer Motion
-- **Charts**: Recharts
-- **State**: React Hooks
+## Notes
 
-### Backend
-- **Framework**: FastAPI
-- **Language**: Python 3.8+
-- **AI/ML**: Sentence Transformers, ChromaDB
-- **API**: RESTful with Pydantic models
-- **CORS**: Configured for frontend integration
-
-### RAG System
-- **Vector DB**: ChromaDB
-- **Embeddings**: Sentence Transformers
-- **Models**: Hugging Face Transformers
-- **Processing**: Custom pipeline for learning content
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📝 License
-
-MIT License - see LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- Built with modern web technologies
-- Powered by open-source AI models
-- Inspired by the need for personalized learning
-
-## 📞 Support
-
-- **Issues**: GitHub Issues
-- **Discussions**: GitHub Discussions
-- **Documentation**: See individual README files in each directory
-
----
-
-**Happy Learning! 🎓✨**
+- the backend already integrates the RAG pipeline for roadmap generation
+- Clerk secures protected routes and stores user-linked profile metadata
+- if secrets were exposed during development, rotate them before deployment

@@ -1,260 +1,208 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import {
-  Mail,
-  MapPin,
-  UserCheck,
-  Settings,
-  Lock,
-  Edit,
-  Trophy,
-  Eye,
-  Users,
-  Rocket
-} from "lucide-react"
+import { useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
+import { BadgeCheck, Brain, Clock3, LibraryBig, MapPin, PencilLine, Sparkles } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-
-type Activity = {
-  id: number
-  action: string
-  time: string
-}
-
-const activities: Activity[] = [
-  { id: 1, action: "Created new project 🚀", time: "2 min ago" },
-  { id: 2, action: "Updated profile info ✏️", time: "1 hour ago" },
-  { id: 3, action: "Completed dashboard UI 🎨", time: "Yesterday" },
-  { id: 4, action: "Reached 1k followers 🎉", time: "2 days ago" },
-]
-
-const skills = [
-  "Next.js",
-  "TypeScript",
-  "Tailwind",
-  "React",
-  "UI/UX",
-  "Framer Motion",
-]
+import ProfileEditor, { type EditableProfile } from "@/components/profile/ProfileEditor";
+import { Card } from "@/components/ui/card";
+import { mergeMetadata, readChronoWeaveLearnerProfile, readChronoWeaveProfile, toList } from "@/lib/clerk-profile";
+import { readStoredProfile, storeProfile } from "@/lib/profile";
+import type { LearnerProfile } from "@/lib/api-client";
 
 export default function ProfilePage() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="min-h-screen bg-gradient-to-br from-purple-900 via-slate-950 to-blue-900 text-white p-6"
-    >
-      <div className="max-w-7xl mx-auto space-y-6">
+  const { isLoaded, user } = useUser();
+  const [profile, setProfile] = useState<LearnerProfile | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-        {/* Profile Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative rounded-2xl overflow-hidden bg-white/10 backdrop-blur-xl border border-white/10 shadow-xl"
-        >
-          {/* Banner */}
-          <div className="h-40 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500" />
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const localProfile = readStoredProfile();
+      const clerkProfile = readChronoWeaveLearnerProfile(user?.unsafeMetadata);
 
-          <div className="px-6 pb-6">
-            <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-12">
+      if (localProfile) {
+        setProfile(localProfile);
+        return;
+      }
 
-              {/* Avatar */}
-              <Avatar className="h-24 w-24 border-4 border-white/20 shadow-lg">
-                <AvatarImage src="/avatar.png" />
-                <AvatarFallback>SJ</AvatarFallback>
-              </Avatar>
+      if (clerkProfile) {
+        storeProfile(clerkProfile);
+        setProfile(clerkProfile);
+      }
+    }, 0);
 
-              {/* Info */}
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold">
-                    Soumyajit Dey
-                  </h1>
+    return () => window.clearTimeout(timer);
+  }, [user?.unsafeMetadata]);
 
-                  <UserCheck className="h-5 w-5 text-blue-400" />
-                </div>
+  if (!isLoaded) {
+    return null;
+  }
 
-                <p className="text-white/70">
-                  soumyajit@example.com
-                </p>
+  const metadataProfile = readChronoWeaveProfile(user?.unsafeMetadata);
+  const mergedProfile = profile || readChronoWeaveLearnerProfile(user?.unsafeMetadata);
+  const displayName = metadataProfile.displayName || user?.fullName || user?.firstName || "Creator";
+  const email = user?.primaryEmailAddress?.emailAddress || "";
 
-                <p className="text-white/60 text-sm mt-1">
-                  Building beautiful Gen-Z dashboards ✨
-                </p>
-              </div>
+  const defaultValues: EditableProfile = {
+    displayName,
+    email,
+    location: metadataProfile.location,
+    bio: metadataProfile.bio,
+    vibe: metadataProfile.vibe,
+    experienceLevel: mergedProfile?.experienceLevel || "beginner",
+    preferredPace: mergedProfile?.preferredPace || "",
+    timeCommitment: mergedProfile?.timeCommitment || "",
+    learningGoals: mergedProfile?.learningGoals.join(", ") || "",
+    interests: mergedProfile?.interests.join(", ") || "",
+    background: mergedProfile?.background || "",
+  };
 
-              <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105 transition-transform rounded-xl">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Profile
-              </Button>
+  const saveProfile = async (data: EditableProfile) => {
+    if (!user) {
+      return;
+    }
 
+    const learnerProfile: LearnerProfile = {
+      experienceLevel: data.experienceLevel,
+      preferredPace: data.preferredPace,
+      timeCommitment: data.timeCommitment,
+      learningGoals: toList(data.learningGoals),
+      interests: toList(data.interests),
+      background: data.background,
+    };
+
+    setIsSaving(true);
+    setError(null);
+    setStatus(null);
+
+    try {
+      await user.update({
+        unsafeMetadata: mergeMetadata(
+          user.unsafeMetadata,
+          {
+            displayName: data.displayName,
+            bio: data.bio,
+            location: data.location,
+            vibe: data.vibe,
+          },
+          learnerProfile,
+        ),
+      });
+
+      storeProfile(learnerProfile);
+      setProfile(learnerProfile);
+      setIsEditing(false);
+      setStatus("Profile synced with Clerk and updated for your roadmap studio.");
+    } catch (saveError) {
+      console.error(saveError);
+      setError("We couldn't save your profile just yet. Please try once more.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (!mergedProfile && !isEditing) {
+    return (
+      <div className="profile-stack">
+        <div className="profile-hero">
+          <div className="profile-hero__identity">
+            <div className="profile-avatar">{displayName.charAt(0).toUpperCase()}</div>
+            <div>
+              <p className="eyebrow">Signed-in identity</p>
+              <h2>{displayName}</h2>
+              <p className="muted">{email || "No email found"}</p>
             </div>
           </div>
-        </motion.div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: "Projects", value: "24", icon: Rocket },
-            { label: "Followers", value: "1.2K", icon: Users },
-            { label: "Views", value: "18K", icon: Eye },
-            { label: "Achievements", value: "12", icon: Trophy },
-          ].map((stat, i) => (
-            <Card
-              key={i}
-              className="bg-white/10 backdrop-blur-xl border border-white/10 hover:scale-105 transition-transform rounded-2xl"
-            >
-              <CardContent className="p-5 flex items-center gap-4">
-                <stat.icon className="h-6 w-6 text-purple-400" />
-                <div>
-                  <p className="text-lg font-bold">
-                    {stat.value}
-                  </p>
-                  <p className="text-sm text-white/60">
-                    {stat.label}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          <button className="button button--primary" type="button" onClick={() => setIsEditing(true)}>
+            <PencilLine size={16} />
+            Build profile
+          </button>
         </div>
 
-        {/* Main Grid */}
-        <div className="grid lg:grid-cols-3 gap-6">
-
-          {/* Left Column */}
-          <div className="space-y-6">
-
-            {/* Personal Info */}
-            <Card className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl">
-              <CardContent className="p-6 space-y-3">
-                <h2 className="font-semibold text-lg">
-                  Personal Info
-                </h2>
-
-                <div className="flex items-center gap-2 text-white/70">
-                  <Mail className="h-4 w-4" />
-                  soumyajit@example.com
-                </div>
-
-                <div className="flex items-center gap-2 text-white/70">
-                  <MapPin className="h-4 w-4" />
-                  India 🌏
-                </div>
-
-                <Badge className="bg-purple-500/20 text-purple-300">
-                  Frontend Developer
-                </Badge>
-              </CardContent>
-            </Card>
-
-            {/* Social Links */}
-            <Card className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl">
-              <CardContent className="p-6 space-y-3">
-                <h2 className="font-semibold text-lg">
-                  Social Links
-                </h2>
-
-                <div className="flex gap-3">
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Skills */}
-            <Card className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl">
-              <CardContent className="p-6 space-y-3">
-                <h2 className="font-semibold text-lg">
-                  Skills
-                </h2>
-
-                <div className="flex flex-wrap gap-2">
-                  {skills.map((skill, i) => (
-                    <Badge
-                      key={i}
-                      className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:scale-105"
-                    >
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Settings */}
-            <Card className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl">
-              <CardContent className="p-6 space-y-3">
-                <h2 className="font-semibold text-lg">
-                  Settings
-                </h2>
-
-                <Button
-                  variant="secondary"
-                  className="w-full justify-start"
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
-
-                <Button
-                  variant="secondary"
-                  className="w-full justify-start"
-                >
-                  <Lock className="h-4 w-4 mr-2" />
-                  Change Password
-                </Button>
-
-                <Button
-                  variant="secondary"
-                  className="w-full justify-start"
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Account Settings
-                </Button>
-              </CardContent>
-            </Card>
-
-          </div>
-
-          {/* Activity Feed */}
-          <div className="lg:col-span-2 space-y-4">
-
-            <h2 className="text-xl font-semibold">
-              Recent Activity
-            </h2>
-
-            {activities.map((item) => (
-              <motion.div
-                key={item.id}
-                whileHover={{ scale: 1.02 }}
-              >
-                <Card className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl">
-                  <CardContent className="p-4 flex items-center gap-4">
-                    
-                    <Avatar>
-                      <AvatarFallback>SJ</AvatarFallback>
-                    </Avatar>
-
-                    <div className="flex-1">
-                      <p>{item.action}</p>
-                      <p className="text-sm text-white/60">
-                        {item.time}
-                      </p>
-                    </div>
-
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-
-          </div>
-
+        <div className="placeholder-state">
+          <h2>No learner profile yet</h2>
+          <p className="muted">Complete onboarding or build your profile here to personalize recommendations and roadmap generation.</p>
         </div>
-
       </div>
-    </motion.div>
-  )
+    );
+  }
+
+  return (
+    <div className="profile-stack">
+      <div className="profile-hero">
+        <div className="profile-hero__identity">
+          <div className="profile-avatar">{displayName.charAt(0).toUpperCase()}</div>
+          <div className="profile-meta">
+            <p className="eyebrow">Learner identity</p>
+            <h2>{displayName}</h2>
+            <p>{metadataProfile.bio || "Design your learning identity so recommendations hit harder."}</p>
+            <div className="profile-meta__row">
+              <span><MapPin size={14} /> {metadataProfile.location || "Location not set"}</span>
+              <span><Sparkles size={14} /> {metadataProfile.vibe || "Still defining the vibe"}</span>
+            </div>
+          </div>
+        </div>
+        <button className="button button--secondary" type="button" onClick={() => setIsEditing((current) => !current)}>
+          <PencilLine size={16} />
+          {isEditing ? "Close editor" : "Edit profile"}
+        </button>
+      </div>
+
+      {status ? <div className="status-banner status-banner--success">{status}</div> : null}
+      {error ? <div className="status-banner status-banner--error">{error}</div> : null}
+
+      <div className="profile-stat-grid">
+        <Card>
+          <p className="eyebrow"><Brain size={14} style={{ marginRight: 6, verticalAlign: "text-bottom" }} />Experience</p>
+          <h3 style={{ marginTop: 0 }}>{mergedProfile?.experienceLevel || "beginner"}</h3>
+        </Card>
+        <Card>
+          <p className="eyebrow"><Clock3 size={14} style={{ marginRight: 6, verticalAlign: "text-bottom" }} />Time commitment</p>
+          <h3 style={{ marginTop: 0 }}>{mergedProfile?.timeCommitment || "Flexible"}</h3>
+        </Card>
+        <Card>
+          <p className="eyebrow"><LibraryBig size={14} style={{ marginRight: 6, verticalAlign: "text-bottom" }} />Goals</p>
+          <h3 style={{ marginTop: 0 }}>{mergedProfile?.learningGoals.length || 0}</h3>
+        </Card>
+        <Card>
+          <p className="eyebrow"><BadgeCheck size={14} style={{ marginRight: 6, verticalAlign: "text-bottom" }} />Interests</p>
+          <h3 style={{ marginTop: 0 }}>{mergedProfile?.interests.length || 0}</h3>
+        </Card>
+      </div>
+
+      {isEditing ? (
+        <ProfileEditor defaultValues={defaultValues} isSaving={isSaving} onCancel={() => setIsEditing(false)} onSave={saveProfile} />
+      ) : null}
+
+      <div className="profile-panel-grid">
+        <Card>
+          <p className="eyebrow">Learning goals</p>
+          <div className="profile-chip-list">
+            {(mergedProfile?.learningGoals || []).map((goal) => (
+              <span key={goal} className="profile-chip">{goal}</span>
+            ))}
+          </div>
+        </Card>
+
+        <Card>
+          <p className="eyebrow">Interests</p>
+          <div className="profile-chip-list">
+            {(mergedProfile?.interests || []).map((interest) => (
+              <span key={interest} className="profile-chip profile-chip--alt">{interest}</span>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      <Card>
+        <p className="eyebrow">Background context</p>
+        <p style={{ marginTop: 0, marginBottom: 0, lineHeight: 1.7 }}>
+          {mergedProfile?.background || "No extra context saved yet. Add your story so roadmap generation has better context."}
+        </p>
+      </Card>
+    </div>
+  );
 }

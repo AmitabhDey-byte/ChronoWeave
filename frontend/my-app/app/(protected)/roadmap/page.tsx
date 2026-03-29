@@ -1,229 +1,155 @@
-// page.tsx
+"use client";
 
-"use client"
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { ArrowRight, BookMarked, Cpu, Database, Sparkles } from "lucide-react";
 
-import { motion } from "framer-motion"
-import {
-  CheckCircle2,
-  Circle,
-  Rocket,
-  Sparkles,
-  Code,
-  Database,
-  Shield,
-  Brain,
-  Trophy
-} from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { generateRoadmap, type RoadmapResponse } from "@/lib/api-client";
+import { readStoredProfile } from "@/lib/profile";
 
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-
-type RoadmapItem = {
-  title: string
-  description: string
-  progress: number
-  status: "completed" | "in-progress" | "pending"
-  icon: any
-  tags: string[]
-}
-
-const roadmap: RoadmapItem[] = [
-  {
-    title: "Frontend Foundations",
-    description:
-      "Learn HTML, CSS, Tailwind, and core JavaScript concepts.",
-    progress: 100,
-    status: "completed",
-    icon: Code,
-    tags: ["HTML", "CSS", "JavaScript"]
-  },
-  {
-    title: "React & Next.js Mastery",
-    description:
-      "Build dynamic UI using React and modern Next.js App Router.",
-    progress: 85,
-    status: "in-progress",
-    icon: Sparkles,
-    tags: ["React", "Next.js", "Hooks"]
-  },
-  {
-    title: "Backend & Database",
-    description:
-      "Learn API creation, databases, and authentication systems.",
-    progress: 60,
-    status: "in-progress",
-    icon: Database,
-    tags: ["Node.js", "MongoDB", "Auth"]
-  },
-  {
-    title: "Security & Optimization",
-    description:
-      "Improve performance, SEO, and web security practices.",
-    progress: 30,
-    status: "pending",
-    icon: Shield,
-    tags: ["Security", "Performance"]
-  },
-  {
-    title: "AI & Advanced Systems",
-    description:
-      "Explore AI tools, automation, and intelligent UI features.",
-    progress: 10,
-    status: "pending",
-    icon: Brain,
-    tags: ["AI", "Automation"]
-  },
-  {
-    title: "Launch Portfolio 🚀",
-    description:
-      "Publish projects and build a strong personal brand.",
-    progress: 0,
-    status: "pending",
-    icon: Rocket,
-    tags: ["Portfolio", "Deployment"]
-  }
-]
 
 export default function RoadmapPage() {
-  return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] p-6 text-white">
+  const [data, setData] = useState<RoadmapResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-      {/* Glow Background */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-10 left-10 w-96 h-96 bg-purple-500/30 blur-[140px] rounded-full animate-pulse" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-pink-500/30 blur-[140px] rounded-full animate-pulse" />
+  useEffect(() => {
+    const profile = readStoredProfile();
+    if (!profile) {
+      const timer = window.setTimeout(() => {
+        setError("No onboarding profile found yet. Complete onboarding first.");
+        setLoading(false);
+      }, 0);
+
+      return () => window.clearTimeout(timer);
+    }
+
+    generateRoadmap(profile)
+      .then((response) => setData(response))
+      .catch((err: Error) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="roadmap-loader">
+        <div className="roadmap-loader__sheet">
+          <div className="roadmap-loader__header">
+            <p className="eyebrow">Generating roadmap</p>
+            <h2>Filling your notebook with the next best moves.</h2>
+            <p className="muted">ChronoWeave is blending your onboarding profile, retrieval context, and roadmap structure.</p>
+          </div>
+
+          <div className="roadmap-loader__thoughts">
+            <div className="roadmap-loader__note">
+              <strong>Reading your vibe</strong>
+              <p>Matching experience, pace, and focus areas.</p>
+            </div>
+            <div className="roadmap-loader__note">
+              <strong>Scanning sources</strong>
+              <p>Pulling grounded snippets from the knowledge base.</p>
+            </div>
+            <div className="roadmap-loader__note">
+              <strong>Sketching phases</strong>
+              <p>Turning the results into a clean learning sequence.</p>
+            </div>
+          </div>
+
+          <div className="roadmap-loader__steps">
+            {["Foundation sprint", "Project lane", "Portfolio signal", "Career polish"].map((item) => (
+              <div key={item} className="roadmap-loader__card">
+                <strong>{item}</strong>
+                <p>Drafting a focused, achievable step for your notebook roadmap.</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
+    );
+  }
 
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-6xl mx-auto space-y-12"
-      >
+  if (error || !data) {
+    return (
+      <div className="placeholder-state">
+        <h2>Roadmap unavailable</h2>
+        <p className="muted">{error || "ChronoWeave could not generate a roadmap yet."}</p>
+        <Link href="/onboarding">
+          <Button>Complete onboarding</Button>
+        </Link>
+      </div>
+    );
+  }
 
-        {/* Header */}
-        <div className="space-y-3">
-
-          <h1 className="text-4xl font-bold flex items-center gap-2">
-            <Trophy className="h-8 w-8 text-yellow-400" />
-            Learning Roadmap
-          </h1>
-
-          <p className="text-white/60 max-w-xl">
-            Track your development journey and unlock new
-            milestones as you grow your skills 🚀
-          </p>
-
+  return (
+    <div className="roadmap-notebook">
+      <section className="roadmap-journal">
+        <div className="roadmap-journal__header">
+          <p className="eyebrow">Generated roadmap</p>
+          <h2>{data.query}</h2>
+          <p className="muted">{data.overview}</p>
         </div>
 
-        {/* Timeline */}
-        <div className="relative space-y-12">
+        <div className="roadmap-journal__badges">
+          <div className="roadmap-badge">
+            <strong>{data.steps.length} phases</strong>
+            <span>broken into realistic milestones</span>
+          </div>
+          <div className="roadmap-badge">
+            <strong>{data.sources.length} source notes</strong>
+            <span>used to ground the roadmap</span>
+          </div>
+          <div className="roadmap-badge">
+            <strong>{data.diagnostics.generatorFallback ? "Fallback mode" : "Model-backed mode"}</strong>
+            <span>current roadmap generation style</span>
+          </div>
+        </div>
+      </section>
 
-          {/* Vertical Line */}
-          <div className="absolute left-6 top-0 bottom-0 w-[2px] bg-gradient-to-b from-purple-500 via-pink-500 to-blue-500 opacity-40" />
+      <div className="roadmap-grid">
+        <section className="roadmap-timeline">
+          {data.steps.map((step, index) => (
+            <article key={step.id} className="roadmap-step">
+              <div className="roadmap-step__number">{index + 1}</div>
+              <p className="eyebrow">Phase {index + 1}</p>
+              <h3 style={{ marginTop: 0 }}>{step.title}</h3>
+              <p className="muted" style={{ marginBottom: 0, lineHeight: 1.7 }}>{step.description}</p>
+            </article>
+          ))}
+        </section>
 
-          {roadmap.map((item, index) => {
-
-            const Icon = item.icon
-
-            const StatusIcon =
-              item.status === "completed"
-                ? CheckCircle2
-                : Circle
-
-            return (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -40 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="flex items-start gap-6"
-              >
-
-                {/* Timeline Dot */}
-                <div className="relative z-10">
-
-                  <div
-                    className={`h-12 w-12 flex items-center justify-center rounded-full backdrop-blur-xl border border-white/10
-                      ${
-                        item.status === "completed"
-                          ? "bg-green-500/20"
-                          : item.status === "in-progress"
-                          ? "bg-yellow-500/20"
-                          : "bg-white/10"
-                      }`}
-                  >
-                    <StatusIcon className="h-5 w-5" />
-                  </div>
-
+        <aside className="roadmap-sidepanel">
+          <Card>
+            <p className="eyebrow"><Sparkles size={14} style={{ marginRight: 6, verticalAlign: "text-bottom" }} />Roadmap summary</p>
+            <p style={{ marginTop: 0 }}>{data.overview}</p>
+          </Card>
+          <Card>
+            <p className="eyebrow"><Database size={14} style={{ marginRight: 6, verticalAlign: "text-bottom" }} />Retrieved sources</p>
+            <div className="roadmap-source-list">
+              {data.sources.length > 0 ? data.sources.map((source, index) => (
+                <div key={`${source.source}-${index}`} className="roadmap-source-card">
+                  <strong>{source.source}</strong>
+                  <p className="muted" style={{ marginBottom: 0 }}>{source.excerpt || "No excerpt available."}</p>
                 </div>
-
-                {/* Card */}
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  className="flex-1"
-                >
-
-                  <Card className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl">
-
-                    <CardContent className="p-6 space-y-4">
-
-                      {/* Title */}
-                      <div className="flex items-center gap-3">
-
-                        <Icon className="h-6 w-6 text-purple-400" />
-
-                        <h2 className="text-lg font-semibold">
-                          {item.title}
-                        </h2>
-
-                      </div>
-
-                      {/* Description */}
-                      <p className="text-white/70 text-sm">
-                        {item.description}
-                      </p>
-
-                      {/* Progress */}
-                      <div className="space-y-2">
-
-                        <div className="flex justify-between text-xs text-white/60">
-                          <span>Progress</span>
-                          <span>{item.progress}%</span>
-                        </div>
-
-                        <Progress value={item.progress} />
-
-                      </div>
-
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-2 pt-2">
-
-                        {item.tags.map((tag, i) => (
-                          <Badge
-                            key={i}
-                            className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:scale-105 transition-transform"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-
-                      </div>
-
-                    </CardContent>
-
-                  </Card>
-
-                </motion.div>
-
-              </motion.div>
-            )
-          })}
-
-        </div>
-
-      </motion.div>
-
+              )) : <p className="muted" style={{ margin: 0 }}>No retrieval snippets were returned for this run.</p>}
+            </div>
+          </Card>
+          <Card>
+            <p className="eyebrow"><Cpu size={14} style={{ marginRight: 6, verticalAlign: "text-bottom" }} />Diagnostics</p>
+            <p className="muted">Documents indexed: {data.diagnostics.documentsIndexed}</p>
+            <p className="muted">Generator mode: {data.diagnostics.generatorFallback ? "Fallback" : "Model-backed"}</p>
+            <p className="muted">Notebook feel: active</p>
+            <Link href="/onboarding">
+              <Button variant="secondary">
+                <BookMarked size={16} />
+                Adjust profile
+                <ArrowRight size={16} style={{ marginLeft: 8 }} />
+              </Button>
+            </Link>
+          </Card>
+        </aside>
+      </div>
     </div>
-  )
+  );
 }

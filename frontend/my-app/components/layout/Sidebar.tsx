@@ -1,48 +1,39 @@
-"use client";
-import React from "react";
+'use client';
 
-export default function Sidebar() {
-  const menuItems = ["Dashboard", "My Roadmaps", "AI Assistant", "Settings"];
+import { useUser } from "@clerk/nextjs";
+import { Home, Map, PenTool, User } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+export const Sidebar = () => {
+  const pathname = usePathname();
+  const { user } = useUser();
+  const menuItems = [
+    { icon: <Home size={18} />, label: "Dashboard", href: "/Dashboard" },
+    { icon: <PenTool size={18} />, label: "Onboarding", href: "/onboarding" },
+    { icon: <Map size={18} />, label: "Roadmap", href: "/roadmap" },
+    { icon: <User size={18} />, label: "Profile", href: "/profile" },
+  ];
 
   return (
-    <>
-      <style>{`
-        .sidebar-root {
-          width: 260px;
-          height: 100vh;
-          background: rgba(15, 12, 41, 0.6);
-          border-right: 1px solid rgba(255, 255, 255, 0.05);
-          padding: 100px 20px 40px;
-          display: flex;
-          flex-direction: column;
-        }
-        .sidebar-item {
-          padding: 14px 16px;
-          border-radius: 12px;
-          color: rgba(255, 255, 255, 0.5);
-          font-size: 15px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s;
-          margin-bottom: 4px;
-        }
-        .sidebar-item:hover {
-          background: rgba(255, 255, 255, 0.05);
-          color: #fff;
-        }
-        .sidebar-item.active {
-          background: rgba(124, 77, 255, 0.1);
-          color: #7c4dff;
-        }
-      `}</style>
-
-      <div className="sidebar-root">
-        {menuItems.map((item, i) => (
-          <div key={item} className={`sidebar-item ${i === 0 ? 'active' : ''}`}>
-            {item}
-          </div>
+    <aside className="sidebar">
+      <div className="sidebar__menu">
+        {menuItems.map((item) => (
+          <Link key={item.href} href={item.href} className={`nav-pill${pathname === item.href ? " nav-pill--active" : ""}`}>
+            {item.icon}
+            <span>{item.label}</span>
+          </Link>
         ))}
       </div>
-    </>
+
+      <div className="sidebar__card">
+        <p className="eyebrow">Studio notes</p>
+        <h3>{user?.firstName ? `${user.firstName}'s studio` : "Keep your RAG context warm"}</h3>
+        <p>
+          Finish onboarding, then generate from the roadmap page to blend your profile with the document store.
+          Your signed-in account keeps that setup attached to you.
+        </p>
+      </div>
+    </aside>
   );
-}
+};

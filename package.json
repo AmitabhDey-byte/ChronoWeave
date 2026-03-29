@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "AI-powered learning roadmap platform",
   "scripts": {
-    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "dev": "node scripts/dev-runner.js",
     "backend": "cd backend && python run.py",
     "frontend": "cd frontend/my-app && npm run dev",
+    "rag": "cd rag && python run.py --mode all",
+    "rag:ingest": "cd rag && python run.py --mode ingest",
+    "rag:embed": "cd rag && python run.py --mode embed",
     "build": "cd frontend/my-app && npm run build",
     "start": "cd frontend/my-app && npm run start",
     "install:all": "npm install && cd frontend/my-app && npm install && cd ../../backend && pip install -r requirements.txt",

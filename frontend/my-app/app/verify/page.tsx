@@ -1,25 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSignUp, useClerk } from "@clerk/nextjs";
+import { useState } from "react";
+import { useSignUp } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
 export default function VerifyPage() {
   const { signUp } = useSignUp();
-  const { setActive } = useClerk();
   const router = useRouter();
 
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [resendLoading, setResendLoading] = useState(false);
-
-  useEffect(() => {
-    // If the user is already verified, redirect them
-    if (signUp.status === "complete") {
-      router.push("/");
-    }
-  }, [signUp.status, router]);
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,11 +21,21 @@ export default function VerifyPage() {
       setLoading(true);
       setError("");
 
-      // Simplified verification - in a real implementation, you'd call the appropriate Clerk method
-      setError("Email verification is not fully implemented yet. Please check your email for instructions.");
-    } catch (err: any) {
+      if (!signUp) {
+        setError("Sign-up session not found. Please start again.");
+        return;
+      }
+
+      const result = await signUp.attemptEmailAddressVerification({ code });
+      if (result.status === "complete") {
+        router.push("/Dashboard");
+        return;
+      }
+
+      setError("Verification is still pending. Please use the latest code from your email.");
+    } catch (err: unknown) {
       console.error(err);
-      setError(err?.errors?.[0]?.message || "Verification failed. Please try again.");
+      setError("Verification failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -44,9 +46,13 @@ export default function VerifyPage() {
 
     try {
       setResendLoading(true);
-      // Simplified resend - in a real implementation, you'd call the appropriate Clerk method
-      setError("Resend functionality not implemented yet.");
-    } catch (err: any) {
+      if (!signUp) {
+        setError("Sign-up session not found. Please start again.");
+        return;
+      }
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      setError("Fresh code sent. Check your inbox and paste the newest one.");
+    } catch (err: unknown) {
       console.error(err);
       setError("Failed to resend code. Please try again.");
     } finally {
@@ -59,9 +65,7 @@ export default function VerifyPage() {
       <div className="w-full max-w-md p-8 bg-white/5 rounded-2xl backdrop-blur-xl border border-white/10">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Verify Your Email</h1>
-          <p className="text-white/60">
-            We've sent a verification code to your email address. Please enter it below.
-          </p>
+          <p className="text-white/60">We&apos;ve sent a verification code to your email address. Please enter it below.</p>
         </div>
 
         {error && (
@@ -77,7 +81,7 @@ export default function VerifyPage() {
               placeholder="Enter verification code"
               className="w-full p-3 rounded-lg bg-white/10 border border-white/20 outline-none focus:border-purple-500 transition-colors text-center text-lg font-mono"
               value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
               maxLength={6}
               required
             />
@@ -93,9 +97,7 @@ export default function VerifyPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-white/60 mb-2">
-            Didn't receive the code?
-          </p>
+          <p className="text-sm text-white/60 mb-2">Didn&apos;t receive the code?</p>
           <button
             onClick={handleResend}
             disabled={resendLoading}
@@ -106,10 +108,7 @@ export default function VerifyPage() {
         </div>
 
         <p className="mt-6 text-sm text-center text-white/60">
-          <span
-            onClick={() => router.push("/signup")}
-            className="cursor-pointer text-purple-400 hover:text-purple-300 transition-colors"
-          >
+          <span onClick={() => router.push("/sign-up")} className="cursor-pointer text-purple-400 hover:text-purple-300 transition-colors">
             Back to Sign Up
           </span>
         </p>

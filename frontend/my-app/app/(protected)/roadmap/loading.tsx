@@ -1,59 +1,45 @@
-// loading.tsx
-
-"use client"
+"use client";
 
 export default function RoadmapLoading() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] p-6 text-white">
-
-      {/* Glow Background */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-10 left-10 w-96 h-96 bg-purple-500/30 blur-[140px] rounded-full animate-pulse" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-pink-500/30 blur-[140px] rounded-full animate-pulse" />
-      </div>
-
-      <div className="max-w-6xl mx-auto space-y-10 animate-pulse">
-
-        {/* Header */}
-        <div className="space-y-3">
-          <div className="h-8 w-64 bg-white/20 rounded-lg" />
-          <div className="h-4 w-96 bg-white/10 rounded-lg" />
+    <div className="roadmap-loader">
+      <div className="roadmap-loader__sheet">
+        <div className="roadmap-loader__header">
+          <p className="eyebrow">Generating roadmap</p>
+          <h2>Writing your next chapter into the notebook.</h2>
+          <p className="muted">The system is gathering grounded source notes, sequencing the phases, and polishing the plan.</p>
         </div>
 
-        {/* Timeline Skeleton */}
-        <div className="relative space-y-10">
+        <div className="roadmap-loader__thoughts">
+          <div className="roadmap-loader__note">
+            <strong>Profile check</strong>
+            <p>Understanding your goals, interests, and time commitment.</p>
+          </div>
+          <div className="roadmap-loader__note">
+            <strong>RAG lookup</strong>
+            <p>Pulling the most relevant context from the knowledge base.</p>
+          </div>
+          <div className="roadmap-loader__note">
+            <strong>Draft build</strong>
+            <p>Composing a phase-by-phase path with projects and momentum.</p>
+          </div>
+        </div>
 
-          {/* Vertical Line */}
-          <div className="absolute left-5 top-0 bottom-0 w-[2px] bg-white/10" />
-
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="flex items-start gap-6">
-
-              {/* Dot */}
-              <div className="h-10 w-10 rounded-full bg-white/20 shrink-0" />
-
-              {/* Card */}
-              <div className="flex-1 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-6 space-y-4">
-
-                <div className="h-5 w-48 bg-white/20 rounded" />
-                <div className="h-4 w-full bg-white/10 rounded" />
-                <div className="h-4 w-3/4 bg-white/10 rounded" />
-
-                <div className="flex gap-2 pt-2">
-                  <div className="h-6 w-16 bg-white/20 rounded-lg" />
-                  <div className="h-6 w-20 bg-white/10 rounded-lg" />
-                  <div className="h-6 w-14 bg-white/10 rounded-lg" />
-                </div>
-
-              </div>
-
+        <div className="roadmap-loader__steps">
+          {[
+            "Pinning down foundations",
+            "Choosing the project path",
+            "Highlighting practice loops",
+            "Stacking portfolio signals",
+            "Finalizing your roadmap sheet",
+          ].map((label) => (
+            <div key={label} className="roadmap-loader__card">
+              <strong>{label}</strong>
+              <p>Sketching a clean, scannable roadmap card for this phase.</p>
             </div>
           ))}
-
         </div>
-
       </div>
-
     </div>
-  )
+  );
 }
