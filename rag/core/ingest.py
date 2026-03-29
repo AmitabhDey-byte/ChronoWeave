@@ -1,8 +1,9 @@
 from pypdf import PdfReader
 import os
 
-def load_pdf(file_path: str) -> str:
-    reader = PdfReader(file_path)
+
+def load_pdf(input_path: str) -> str:
+    reader = PdfReader(input_path)
     text = ""
 
     for page in reader.pages:
@@ -21,7 +22,7 @@ def chunk_text(text: str, chunk_size=500, overlap=100):
         end = start + chunk_size
         chunk = text[start:end]
 
-        if chunk.strip():  # avoid empty chunks
+        if chunk.strip():  
             chunks.append(chunk)
 
         start += chunk_size - overlap
@@ -36,23 +37,34 @@ def save_chunks(chunks, output_path):
         for chunk in chunks:
             f.write(chunk + "\n---\n")
 
-
-def process_pdf():
-    input_path = "rag/data/raw/roadmap.pdf"
+def process_pdfs():
+    input_dir = r"\ChronoWeave\rag\data\raw"
     output_path = "rag/data/processed/chunks.txt"
 
-    print("Reading PDF...")
-    text = load_pdf(input_path)
+    all_text = ""
 
-    print(" Chunking text...")
-    chunks = chunk_text(text)
+    print(" Reading PDFs from folder...")
+
+    for file in os.listdir(input_dir):
+        if file.endswith(".pdf"):
+            file_path = os.path.join(input_dir, file)
+            print(f" Processing: {file}")
+
+            text = load_pdf(file_path)
+            all_text += text + "\n"
+
+    if not all_text.strip():
+        print(" No text extracted. Check PDFs.")
+        return
+
+    print(" Chunking combined text...")
+    chunks = chunk_text(all_text)
 
     print(f" Total chunks created: {len(chunks)}")
 
     save_chunks(chunks, output_path)
 
-    print("Chunks saved successfully!")
-
+    print(" All chunks saved successfully!")
 
 if __name__ == "__main__":
-    process_pdf()
+    process_pdfs()

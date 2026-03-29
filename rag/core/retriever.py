@@ -1,28 +1,38 @@
 from db.chroma_store import ChromaStore
 
-class Retriever:
-    def __init__(self):
-        self.store = ChromaStore()
 
-    def get_relevant_docs(self, query: str, n_results: int = 5, filters=None):
+class Retriever:
+    def __init__(self, store: ChromaStore | None = None):
+        self.store = store or ChromaStore()
+
+    def get_relevant_docs(
+        self,
+        query: str,
+        n_results: int = 5,
+        filters: dict | None = None,
+    ) -> list[dict]:
         """
-        Retrieve top relevant documents from vector DB
+        Retrieve the top-n most relevant documents for a query.
+        Returns a list of dicts: [{"text": str, "metadata": dict, "distance": float}, ...]
+        Returns [] if the store is empty or anything goes wrong.
         """
+        if not query or not query.strip():
+            print("[Retriever] Empty query — skipping retrieval.")
+            return []
 
         results = self.store.query(
-            query_text=query,
+            query_text=query.strip(),
             n_results=n_results,
-            filters=filters
+            filters=filters,
         )
 
-        documents = results.get("documents", [[]])[0]
-        metadatas = results.get("metadatas", [[]])[0]
+        if not results:
+            print("[Retriever] No results returned from store.")
+            return []
 
-        combined = []
-        for doc, meta in zip(documents, metadatas):
-            combined.append({
-                "text": doc,
-                "metadata": meta
-            })
+        print(f"[Retriever] Retrieved {len(results)} docs for query: '{query[:60]}'")
+        return results
 
-        return combined
+    def is_ready(self) -> bool:
+        """Returns True if the collection has at least one document indexed."""
+        return self.store.count() > 0

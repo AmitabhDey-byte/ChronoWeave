@@ -1,95 +1,102 @@
 import os
 import chromadb
-from chromadb.config import Settings
 from sentence_transformers import SentenceTransformer
-
-
 class ChromaStore:
     def __init__(
         self,
         persist_directory: str = "rag/data/embeddings",
         collection_name: str = "roadmap_data",
         embedding_model: str = "all-MiniLM-L6-v2",
+        embedder=None,
     ):
-        """
-        Initialize Chroma DB client and embedding model
-        """
-
         self.persist_directory = persist_directory
         self.collection_name = collection_name
 
-        # Create directory if not exists
         os.makedirs(self.persist_directory, exist_ok=True)
 
-        # Initialize Chroma client
-        self.client = chromadb.Client(
-            Settings(
-                persist_directory=self.persist_directory,
-                anonymized_telemetry=False
-            )
-        )
+        self.client = chromadb.PersistentClient(path=self.persist_directory)
         self.collection = self.client.get_or_create_collection(
-            name=self.collection_name
+            name=self.collection_name,
+            metadata={"hnsw:space": "cosine"},
         )
-        self.embedder = SentenceTransformer(embedding_model)
 
-    def add_documents(self, documents):
+        self.embedder = embedder or SentenceTransformer(embedding_model)
+
+        print(f"[ChromaStore] Collection '{collection_name}' ready. "
+              f"Docs indexed: {self.collection.count()}")
+
+    def add_documents(self, documents: list[dict]):
         """
-        Add documents to ChromaDB
-
-        documents = [
-            {
-                "id": "1",
-                "text": "Learn Python basics...",
-                "metadata": {"career": "AI Engineer"}
-            }
-        ]
+        Upsert documents into ChromaDB.
+        Each document must have: id (str), text (str), metadata (dict, optional)
         """
+        if not documents:
+            print("[ChromaStore] No documents to add.")
+            return
 
-        ids = []
-        texts = []
-        metadatas = []
-        embeddings = []
+        ids       = [doc["id"] for doc in documents]
+        texts     = [doc["text"] for doc in documents]
+        metadatas = [doc.get("metadata", {}) for doc in documents]
+        embeddings = self.embedder.encode(texts, show_progress_bar=True).tolist()
 
-        for doc in documents:
-            ids.append(doc["id"])
-            texts.append(doc["text"])
-            metadatas.append(doc.get("metadata", {}))
-        embeddings = self.embedder.encode(texts).tolist()
-        self.collection.add(
+        self.collection.upsert(
             ids=ids,
             documents=texts,
             metadatas=metadatas,
-            embeddings=embeddings
+            embeddings=embeddings,
         )
+        print(f"[ChromaStore] Upserted {len(ids)} documents. "
+              f"Total in collection: {self.collection.count()}")
 
-        print(f"Added {len(ids)} documents to ChromaDB")
-
-    def query(self, query_text, n_results=5, filters=None):
+    def query(
+        self,
+        query_text: str,
+        n_results: int = 5,
+        filters: dict | None = None,
+    ) -> list[dict]:
         """
-        Query similar documents
+        Query the collection and return a clean list of dicts:
+            [{"text": str, "metadata": dict, "distance": float}, ...]
+        Returns an empty list if the collection is empty or query fails.
         """
+        count = self.collection.count()
+        if count == 0:
+            print("[ChromaStore] Collection is empty — run embeddings.py first.")
+            return []
+        n_results = min(n_results, count)
+        embedding = self.embedder.encode([query_text])[0].tolist()
 
-        query_embedding = self.embedder.encode(query_text).tolist()
+        query_kwargs: dict = {
+            "query_embeddings": [embedding],  
+            "n_results": n_results,
+            "include": ["documents", "metadatas", "distances"],
+        }
+        if filters:
+            query_kwargs["where"] = filters
 
-        results = self.collection.query(
-            query_embeddings=[query_embedding],
-            n_results=n_results,
-            where=filters  # metadata filtering
-        )
+        try:
+            raw = self.collection.query(**query_kwargs)
+        except Exception as e:
+            print(f"[ChromaStore] Query failed: {e}")
+            return []
 
-        return results
+        docs      = (raw.get("documents")  or [[]])[0]
+        metas     = (raw.get("metadatas")  or [[]])[0]
+        distances = (raw.get("distances")  or [[]])[0]
 
+        return [
+            {"text": doc, "metadata": meta, "distance": dist}
+            for doc, meta, dist in zip(docs, metas, distances)
+        ]
+    def count(self) -> int:
+        return self.collection.count()
     def delete_all(self):
-        """
-        Delete entire collection (use carefully)
-        """
         self.client.delete_collection(self.collection_name)
-        print("🗑️ Collection deleted")
-
+        # recreate so the object stays usable
+        self.collection = self.client.get_or_create_collection(
+            name=self.collection_name,
+            metadata={"hnsw:space": "cosine"},
+        )
+        print("[ChromaStore] Collection deleted and recreated.")
     def persist(self):
-        """
-        Persist data to disk
-        """
-        self.client.persist()
-        print( "Data persisted successfully")
+        pass
