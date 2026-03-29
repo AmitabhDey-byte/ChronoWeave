@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+pydantic
+chromadb
+sentence-transformers
+transformers
+torch
+pypdf
+pandas
