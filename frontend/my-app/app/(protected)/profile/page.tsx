@@ -4,9 +4,6 @@ import { motion } from "framer-motion"
 import {
   Mail,
   MapPin,
-  Github,
-  Linkedin,
-  Twitter,
   UserCheck,
   Settings,
   Lock,
@@ -163,9 +160,6 @@ export default function ProfilePage() {
                 </h2>
 
                 <div className="flex gap-3">
-                  <Github className="hover:scale-110 cursor-pointer" />
-                  <Linkedin className="hover:scale-110 cursor-pointer" />
-                  <Twitter className="hover:scale-110 cursor-pointer" />
                 </div>
               </CardContent>
             </Card>

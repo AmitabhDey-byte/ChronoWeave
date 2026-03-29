@@ -89,7 +89,7 @@ export default function Navbar() {
             color: "#fff",
             border: "1px solid rgba(255,255,255,0.2)",
           }}
-          onClick={() => router.push("/signup")}
+          onClick={() => router.push("/dashboard")}
         >
           Get Started
         </button>

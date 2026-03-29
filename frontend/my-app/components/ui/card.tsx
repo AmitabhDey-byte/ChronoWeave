@@ -5,8 +5,9 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 export interface CardProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+  extends Omit<React.ComponentProps<typeof motion.div>, "size" | "children"> {
   hover?: boolean
+  children?: React.ReactNode
 }
 
 const Card = React.forwardRef<
@@ -59,4 +60,16 @@ const Card = React.forwardRef<
 
 Card.displayName = "Card"
 
-export { Card }
+const CardContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("p-6", className)}
+    {...props}
+  />
+))
+CardContent.displayName = "CardContent"
+
+export { Card, CardContent }

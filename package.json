@@ -1,5 +1,21 @@
 {
+  "name": "chronoweave",
+  "version": "1.0.0",
+  "description": "AI-powered learning roadmap platform",
+  "scripts": {
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && python run.py",
+    "frontend": "cd frontend/my-app && npm run dev",
+    "build": "cd frontend/my-app && npm run build",
+    "start": "cd frontend/my-app && npm run start",
+    "install:all": "npm install && cd frontend/my-app && npm install && cd ../../backend && pip install -r requirements.txt",
+    "setup": "npm run install:all && cd rag && python run.py --mode ingest && python run.py --mode embed"
+  },
   "devDependencies": {
-    "@types/react": "^19.2.14"
-  }
+    "@types/react": "^19.2.14",
+    "concurrently": "^8.2.2"
+  },
+  "keywords": ["learning", "ai", "rag", "education"],
+  "author": "ChronoWeave Team",
+  "license": "MIT"
 }

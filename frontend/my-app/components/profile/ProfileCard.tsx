@@ -4,9 +4,6 @@ import { motion } from "framer-motion"
 import {
   Mail,
   MapPin,
-  Github,
-  Linkedin,
-  Twitter,
   UserCheck,
   Users,
   Eye,
@@ -98,17 +95,6 @@ export default function ProfileCard({
                 {bio}
               </p>
             )}
-
-            {/* Social */}
-            <div className="flex gap-3 pt-2">
-
-              <Github className="cursor-pointer hover:scale-110 transition-transform text-white/70" />
-
-              <Linkedin className="cursor-pointer hover:scale-110 transition-transform text-white/70" />
-
-              <Twitter className="cursor-pointer hover:scale-110 transition-transform text-white/70" />
-
-            </div>
 
           </div>
 

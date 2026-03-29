@@ -77,7 +77,7 @@ export default function LandingPage() {
           <button
             className="nav-btn"
             style={{ padding: "16px 32px", fontSize: "16px" }}
-            onClick={() => router.push("/signup")}
+            onClick={() => router.push("/onboarding")} // ✅ FIXED (navigate to onboarding)
           >
             Build My Roadmap
           </button>
