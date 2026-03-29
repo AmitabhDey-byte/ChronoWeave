@@ -1,7 +1,10 @@
 "use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
+  const router = useRouter(); // ✅ FIX: initialize router inside component
+
   return (
     <>
       <style>{`
@@ -31,6 +34,7 @@ export default function Navbar() {
           display: flex;
           align-items: center;
           gap: 8px;
+          cursor: pointer;
         }
         .nav-links {
           display: flex;
@@ -57,16 +61,38 @@ export default function Navbar() {
       `}</style>
 
       <nav className="nav-container">
-        <div className="nav-logo">
-          <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'linear-gradient(135deg, #7c4dff, #00b4d8)' }} />
+        <div
+          className="nav-logo"
+          onClick={() => router.push("/")} // optional: go home on click
+        >
+          <div
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #7c4dff, #00b4d8)",
+            }}
+          />
           ChronoWeave
         </div>
+
         <div className="nav-links">
           <a href="#" className="nav-link">Features</a>
           <a href="#" className="nav-link">Templates</a>
           <a href="#" className="nav-link">Community</a>
         </div>
-        <button className="nav-btn">Get Started</button>
+
+        <button
+          className="nav-btn"
+          style={{
+            background: "transparent",
+            color: "#fff",
+            border: "1px solid rgba(255,255,255,0.2)",
+          }}
+          onClick={() => router.push("/signup")}
+        >
+          Get Started
+        </button>
       </nav>
     </>
   );

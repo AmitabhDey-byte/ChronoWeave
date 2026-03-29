@@ -1,8 +1,11 @@
 "use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "../components/layout/Navbar";
 
 export default function LandingPage() {
+  const router = useRouter(); // ✅ FIXED (inside component)
+
   return (
     <>
       <style>{`
@@ -71,10 +74,22 @@ export default function LandingPage() {
         </p>
 
         <div className="cta-group">
-          <button className="nav-btn" style={{ padding: '16px 32px', fontSize: '16px' }}>
+          <button
+            className="nav-btn"
+            style={{ padding: "16px 32px", fontSize: "16px" }}
+            onClick={() => router.push("/signup")}
+          >
             Build My Roadmap
           </button>
-          <button className="nav-btn" style={{ background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
+
+          <button
+            className="nav-btn"
+            style={{
+              background: "transparent",
+              color: "#fff",
+              border: "1px solid rgba(255,255,255,0.2)",
+            }}
+          >
             Watch Demo
           </button>
         </div>
