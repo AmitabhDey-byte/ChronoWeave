@@ -1,18 +1,28 @@
-import os
+from __future__ import annotations
+
+from pathlib import Path
+
 import chromadb
 from sentence_transformers import SentenceTransformer
+
+
+CORE_DIR = Path(__file__).resolve().parent.parent
+RAG_DIR = CORE_DIR.parent
+DEFAULT_EMBEDDINGS_DIR = RAG_DIR / "data" / "embeddings"
+
+
 class ChromaStore:
     def __init__(
         self,
-        persist_directory: str = "rag/data/embeddings",
+        persist_directory: str | None = None,
         collection_name: str = "roadmap_data",
         embedding_model: str = "all-MiniLM-L6-v2",
         embedder=None,
     ):
-        self.persist_directory = persist_directory
+        self.persist_directory = str(Path(persist_directory) if persist_directory else DEFAULT_EMBEDDINGS_DIR)
         self.collection_name = collection_name
 
-        os.makedirs(self.persist_directory, exist_ok=True)
+        Path(self.persist_directory).mkdir(parents=True, exist_ok=True)
 
         self.client = chromadb.PersistentClient(path=self.persist_directory)
         self.collection = self.client.get_or_create_collection(

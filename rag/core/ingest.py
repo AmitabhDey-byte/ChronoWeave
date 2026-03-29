@@ -1,7 +1,16 @@
-from pypdf import PdfReader
-import pandas as pd
+from __future__ import annotations
+
 import json
-import os
+from pathlib import Path
+
+import pandas as pd
+from pypdf import PdfReader
+
+
+CORE_DIR = Path(__file__).resolve().parent
+RAG_DIR = CORE_DIR.parent
+RAW_DIR = RAG_DIR / "data" / "raw"
+PROCESSED_CHUNKS_PATH = RAG_DIR / "data" / "processed" / "chunks.txt"
 
 def load_pdf(input_path: str) -> str:
     reader = PdfReader(input_path)
@@ -62,35 +71,36 @@ def chunk_text(text: str, chunk_size=500, overlap=100):
     return chunks
 
 def save_chunks(chunks, output_path):
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    output = Path(output_path)
+    output.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(output_path, "w", encoding="utf-8") as f:
+    with output.open("w", encoding="utf-8") as f:
         for chunk in chunks:
             f.write(chunk + "\n---\n")
 
 def process_files():
-    input_dir = "D:\\ChronoWeave-2\\ChronoWeave\\rag\\data\\raw"
-    output_path = "D:\\ChronoWeave-2\\ChronoWeave\\rag\\data\\processed\\chunks.txt"
+    input_dir = RAW_DIR
+    output_path = PROCESSED_CHUNKS_PATH
 
     all_text = ""
 
     print(" Reading files from raw folder...\n")
 
-    for file in os.listdir(input_dir):
-        file_path = os.path.join(input_dir, file)
+    for file_path in input_dir.iterdir():
+        file = file_path.name
 
         try:
             if file.endswith(".pdf"):
                 print(f" Processing PDF: {file}")
-                text = load_pdf(file_path)
+                text = load_pdf(str(file_path))
 
             elif file.endswith(".csv"):
                 print(f" Processing CSV: {file}")
-                text = load_csv(file_path)
+                text = load_csv(str(file_path))
 
             elif file.endswith(".json"):
                 print(f" Processing JSON: {file}")
-                text = load_json(file_path)
+                text = load_json(str(file_path))
 
             else:
                 continue
@@ -110,7 +120,7 @@ def process_files():
 
     print(f" Total chunks created: {len(chunks)}")
 
-    save_chunks(chunks, output_path)
+    save_chunks(chunks, str(output_path))
 
     print("Chunks saved successfully!")
 

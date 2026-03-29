@@ -2,7 +2,7 @@ import argparse
 
 from ingest import process_files
 from embed import main as embed_data
-from pipeline import RAGPipeline
+from pipeline_service import RAGPipeline
 
 
 def run_ingest():

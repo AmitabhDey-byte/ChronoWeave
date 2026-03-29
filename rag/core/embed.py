@@ -1,10 +1,18 @@
-from db.chroma_store import ChromaStore
-import sys
-import os
+from __future__ import annotations
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-def load_chunks(file_path="D:\\ChronoWeave-2\\ChronoWeave\\rag\\data\\processed\\chunks.txt"):
-    with open(file_path, "r", encoding="utf-8") as f:
+from pathlib import Path
+
+from db.chroma_store import ChromaStore
+
+
+CORE_DIR = Path(__file__).resolve().parent
+RAG_DIR = CORE_DIR.parent
+DEFAULT_CHUNKS_PATH = RAG_DIR / "data" / "processed" / "chunks.txt"
+
+
+def load_chunks(file_path: str | Path | None = None):
+    target = Path(file_path) if file_path else DEFAULT_CHUNKS_PATH
+    with target.open("r", encoding="utf-8") as f:
         raw = f.read()
 
     chunks = raw.split("\n---\n")

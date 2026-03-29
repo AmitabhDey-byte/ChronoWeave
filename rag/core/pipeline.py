@@ -1,5 +1,5 @@
 from models.hf_model import HFModels
-from core.retriever import Retriever
+from retriever import Retriever
 class RAGPipeline:
     def __init__(self):
         self.retriever = Retriever()
