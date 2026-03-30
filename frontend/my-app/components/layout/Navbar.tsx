@@ -31,7 +31,7 @@ export const Navbar = () => {
               <Sparkles size={16} />
               <span>Signed in</span>
             </div>
-            <UserButton afterSignOutUrl="/" />
+            <UserButton />
           </div>
         ) : (
           <SignInButton mode="redirect">
