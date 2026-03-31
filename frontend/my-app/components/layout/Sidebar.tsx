@@ -1,7 +1,7 @@
 'use client';
 
 import { useUser } from "@clerk/nextjs";
-import { Home, Map, PenTool, User } from "lucide-react";
+import { Bot, Home, Map, PenTool, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -12,6 +12,7 @@ export const Sidebar = () => {
     { icon: <Home size={18} />, label: "Dashboard", href: "/Dashboard" },
     { icon: <PenTool size={18} />, label: "Onboarding", href: "/onboarding" },
     { icon: <Map size={18} />, label: "Roadmap", href: "/roadmap" },
+    { icon: <Bot size={18} />, label: "Support Chat", href: "/aibot" },
     { icon: <User size={18} />, label: "Profile", href: "/profile" },
   ];
 

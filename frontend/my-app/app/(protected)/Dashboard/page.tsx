@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Database, Sparkles, Target } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import AiCoachCard from "@/components/bot/ai";
 import { Card } from "@/components/ui/card";
 import { fetchHealth, fetchRecommendations, type HealthResponse, type RecommendationResponse } from "@/lib/api-client";
 import { readStoredProfile } from "@/lib/profile";
@@ -92,6 +93,7 @@ export default function DashboardPage() {
         </section>
 
         <aside className="info-grid" style={{ gridTemplateColumns: "1fr" }}>
+          <AiCoachCard compact />
           <Card>
             <p className="eyebrow"><Database size={14} style={{ marginRight: 6, verticalAlign: "text-bottom" }} />System check</p>
             <p style={{ marginTop: 0 }}>

@@ -426,6 +426,193 @@ select {
   border: 1px solid rgba(255, 248, 232, 0.14);
 }
 
+.ai-coach-card,
+.bot-page,
+.bot-sidepanel,
+.bot-prompt-list,
+.mental-chat,
+.mental-chat__messages,
+.mental-chat__composer {
+  display: grid;
+}
+
+.ai-coach-card {
+  gap: 16px;
+}
+
+.ai-coach-card--compact {
+  min-height: 100%;
+}
+
+.ai-coach-card__visual,
+.ai-coach-card__body {
+  display: flex;
+}
+
+.ai-coach-card__visual {
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.ai-coach-card__orb {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 2px solid rgba(30, 23, 32, 0.88);
+  background: linear-gradient(135deg, #ffe29a, #c9f8ff);
+  box-shadow: 6px 6px 0 rgba(20, 15, 28, 0.12);
+}
+
+.ai-coach-card__image {
+  object-fit: contain;
+  padding: 8px;
+}
+
+.ai-coach-card__body {
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ai-coach-card__body h3,
+.ai-coach-card__body p {
+  margin: 0;
+}
+
+.ai-coach-card__prompts,
+.bot-sidepanel,
+.bot-prompt-list,
+.bot-page,
+.mental-chat,
+.mental-chat__messages,
+.mental-chat__composer {
+  gap: 12px;
+}
+
+.mental-chat {
+  padding: 24px;
+  border-radius: 28px;
+  border: 2px solid rgba(30, 23, 32, 0.88);
+  background:
+    radial-gradient(circle at top right, rgba(255, 120, 201, 0.12), transparent 24%),
+    linear-gradient(180deg, #fffdf7 0%, #fff6ee 100%);
+  box-shadow: 8px 8px 0 rgba(20, 15, 28, 0.14);
+  color: #221a25;
+}
+
+.mental-chat__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.mental-chat__header h3,
+.mental-chat__header p,
+.mental-chat__message p,
+.mental-chat__notice p {
+  margin: 0;
+}
+
+.mental-chat__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #fff0c8;
+  border: 2px solid rgba(30, 23, 32, 0.88);
+  white-space: nowrap;
+}
+
+.mental-chat__notice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #fff2e2;
+  border: 2px dashed rgba(30, 23, 32, 0.55);
+}
+
+.mental-chat__messages {
+  min-height: 420px;
+  max-height: 620px;
+  overflow: auto;
+  padding: 6px;
+}
+
+.mental-chat__message {
+  max-width: min(78%, 640px);
+  padding: 16px 18px;
+  border-radius: 22px;
+  border: 2px solid rgba(30, 23, 32, 0.88);
+  box-shadow: 5px 5px 0 rgba(20, 15, 28, 0.08);
+}
+
+.mental-chat__message--assistant {
+  background: #fff7dc;
+}
+
+.mental-chat__message--user {
+  margin-left: auto;
+  background: #dbf6ff;
+}
+
+.mental-chat__role {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6a5842;
+}
+
+.mental-chat__typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mental-chat__spinner {
+  animation: spin 0.8s linear infinite;
+}
+
+.mental-chat__prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mental-chat__prompt {
+  border: 1px solid rgba(30, 23, 32, 0.16);
+  cursor: pointer;
+}
+
+.mental-chat__prompt:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.mental-chat__input {
+  min-height: 130px;
+}
+
+.mental-chat__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mental-chat__error {
+  margin: 0;
+  color: #a43f3f;
+}
+
 .tag-row,
 .pill-row {
   display: flex;
@@ -1417,6 +1604,12 @@ select {
     justify-self: start;
   }
 
+  .mental-chat__header,
+  .mental-chat__actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .profile-stat-grid,
   .profile-editor__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1503,5 +1696,9 @@ select {
   .roadmap-step__number {
     width: 40px;
     height: 40px;
+  }
+
+  .mental-chat__message {
+    max-width: 100%;
   }
 }

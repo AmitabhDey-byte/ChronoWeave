@@ -1,35 +1,53 @@
-"use client";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
+import { MessageSquare, Sparkles } from "lucide-react";
 
-export default function AiCoachCard() {
-  const router = useRouter();
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
+type AiCoachCardProps = {
+  compact?: boolean;
+};
+
+export default function AiCoachCard({ compact = false }: AiCoachCardProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-md p-6 flex flex-col justify-center items-center h-[250px] text-center">
-      <div className="w-20 h-20 relative mb-4">
-        <Image
-          src="/bot.png"
-          alt="AI Coach"
-          fill
-          className="object-contain"
-        />
+    <Card className={`ai-coach-card${compact ? " ai-coach-card--compact" : ""}`}>
+      <div className="ai-coach-card__visual">
+        <div className="ai-coach-card__orb">
+          <Image
+            src="/bot.png"
+            alt="ChronoWeave chatbot"
+            fill
+            sizes="80px"
+            className="ai-coach-card__image"
+          />
+        </div>
+        <span className="tag">
+          <Sparkles size={14} />
+          AI companion
+        </span>
       </div>
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-        Need Help?
-      </h3>
 
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-        Ask our AI Civic Coach about laws, rights and duties.
-      </p>
+      <div className="ai-coach-card__body">
+        <p className="eyebrow">Wellness chatbot</p>
+        <h3>A listening space for stress, frustration, and emotional overload</h3>
+        <p className="muted">
+          Open an independent support chat that listens, helps you slow down, and offers gentle coping guidance when life feels heavy.
+        </p>
+      </div>
 
-      {/* Button */}
-      <button
-        onClick={() => router.push("/aicoach")}
-        className="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-semibold text-sm transition-all transform hover:scale-105 active:scale-95"
-      >
-        Ask Coach
-      </button>
-    </div>
+      <div className="ai-coach-card__prompts">
+        {["I need to vent", "Help me calm down", "I feel overwhelmed"].map((prompt) => (
+          <span key={prompt} className="tag">{prompt}</span>
+        ))}
+      </div>
+
+      <Link href="/aibot">
+        <Button variant={compact ? "secondary" : "primary"}>
+          <MessageSquare size={16} />
+          Open chatbot
+        </Button>
+      </Link>
+    </Card>
   );
 }
